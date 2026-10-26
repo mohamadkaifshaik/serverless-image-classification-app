@@ -46,11 +46,16 @@ def parse_args():
 
 def load_datasets(data_dir, quick=False):
     if data_dir is None:
-        archive = tf.keras.utils.get_file("flower_photos.tgz", origin=DATASET_URL, extract=True)
-        data_dir = pathlib.Path(archive).with_suffix("")  # .../flower_photos
-        # newer keras versions extract into <name>_extracted/<name>
-        if not data_dir.exists():
-            data_dir = pathlib.Path(archive).parent / "flower_photos_extracted" / "flower_photos"
+        # keras 2 returns the archive path and extracts next to it, keras 3 returns
+        # <name>_extracted/ and the real folder sits one level below. handle both.
+        got = pathlib.Path(tf.keras.utils.get_file("flower_photos.tgz", origin=DATASET_URL, extract=True))
+        candidates = [
+            got / "flower_photos",
+            got.with_suffix(""),
+            got.parent / "flower_photos_extracted" / "flower_photos",
+            got.parent / "flower_photos",
+        ]
+        data_dir = next(c for c in candidates if (c / "daisy").is_dir())
     data_dir = pathlib.Path(data_dir)
     print(f"dataset dir: {data_dir}")
 
@@ -102,6 +107,20 @@ def build_model(num_classes):
     outputs = tf.keras.layers.Dense(num_classes, activation="softmax", name="probs")(x)
     model = tf.keras.Model(inputs, outputs, name="flowers_mobilenetv2")
     return model, base
+
+
+def export_for_inference(model, path):
+    """Save the model without optimizer state.
+
+    A compiled keras 3 model writes the Adam slots into model.weights.h5 (~3x the size, 27MB
+    instead of 9MB for MobileNetV2) and include_optimizer=False is ignored for the .keras format.
+    Reloading with compile=False and saving again gives us just the weights.
+    """
+    tmp = path.with_suffix(".tmp.keras")
+    model.save(tmp)
+    clean = tf.keras.models.load_model(tmp, compile=False)
+    clean.save(path)
+    tmp.unlink()
 
 
 def merge_history(h1, h2):
@@ -165,7 +184,7 @@ def main():
 
     # ---- export -------------------------------------------------------------------
     model_path = MODEL_DIR / "flowers_mobilenetv2.keras"
-    model.save(model_path)
+    export_for_inference(model, model_path)
     (MODEL_DIR / "labels.json").write_text(json.dumps(class_names, indent=2))
     history = merge_history(h1, h2)
     history["final_val_accuracy"] = float(val_acc)
