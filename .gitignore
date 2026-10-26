@@ -1,0 +1,31 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# training artifacts
+data/
+training/checkpoints/
+training/logs/
+*.h5
+
+# keep the exported model dir tracked but not big intermediate files
+model/*.tmp
+
+# env / secrets
+.env
+*.json.key
+serviceAccountKey.json
+
+# firebase
+frontend/.firebase/
+frontend/firebase-debug.log
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
