@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flower Classifier</title>
+  <meta name="description" content="Upload a flower photo and a MobileNetV2 model on Cloud Run tells you what it is." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌼</text></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>Flower classifier</h1>
+      <p class="sub">
+        MobileNetV2 fine-tuned on the TensorFlow flowers dataset, served from a Docker container on
+        Cloud Run. Pick a photo of a daisy, dandelion, rose, sunflower or tulip.
+      </p>
+      <p class="status" id="status" aria-live="polite">checking API&hellip;</p>
+    </header>
+
+    <section class="card">
+      <label id="drop" class="drop" for="file" tabindex="0">
+        <input id="file" type="file" accept="image/*" hidden />
+        <div class="drop-inner" id="drop-inner">
+          <span class="drop-icon" aria-hidden="true">&#8679;</span>
+          <strong>Drop an image here</strong>
+          <span>or click to choose one &middot; JPG / PNG / WebP up to 10 MB</span>
+        </div>
+        <img id="preview" class="preview" alt="" hidden />
+      </label>
+
+      <div class="actions">
+        <button id="predict" class="btn primary" disabled>Classify</button>
+        <button id="clear" class="btn" disabled>Clear</button>
+      </div>
+
+      <div id="result" class="result" hidden>
+        <div class="top">
+          <span class="top-label" id="top-label"></span>
+          <span class="top-conf" id="top-conf"></span>
+        </div>
+        <ul class="bars" id="bars"></ul>
+        <p class="meta" id="meta"></p>
+      </div>
+
+      <p id="error" class="error" role="alert" hidden></p>
+    </section>
+
+    <footer>
+      <span>Flask + TensorFlow on Cloud Run &middot; Firebase Hosting</span>
+    </footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
