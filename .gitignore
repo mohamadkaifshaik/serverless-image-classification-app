@@ -29,3 +29,8 @@ frontend/firebase-debug.log
 Thumbs.db
 .vscode/
 .idea/
+
+# keep the metrics from the last run, drop everything else under logs
+!training/logs/
+training/logs/*
+!training/logs/history.json
